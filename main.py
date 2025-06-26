@@ -33,15 +33,15 @@ JSONStructure = Union[JSONArray, JSONObject]
 @app.get('/')# GET # allow all origins all methods.
 async def index():
     return "Welcome to CaesarAI Template. Hello"
-@app.post("/api/save-riskprofile")
+@app.post("/api/save-risk-profile")
 async def save_riskprofile(userData:UserData):
     risk_profile_exists = caesarcrud.check_exists(("*"), UserData.USERDATATABLE)
     if not risk_profile_exists:
          caesarcrud.post_data(fields=UserData.USERDATAFIELDNAME, values=(userData.riskProfile,), table=UserData.USERDATATABLE)
          return {"message":"risk profile was stored."}
     else:
-        risk_profile = caesarcrud.get_data(UserData.USERDATAFIELDNAME,UserData.USERDATATABLE)[0]
-        caesarcrud.update_data(UserData.USERDATAFIELDNAME, values=(userData.riskProfile,), table=UserData.USERDATATABLE, condition=f"risk_profile = '{risk_profile}'")
+        risk_profile :UserData= caesarcrud.get_data(UserData.USERDATAFIELDNAME,UserData.USERDATATABLE)[0]
+        caesarcrud.update_data(UserData.USERDATAFIELDNAME, values=(userData.riskProfile,), table=UserData.USERDATATABLE, condition=f"risk_profile = '{risk_profile.riskProfile}'")
         return {"message":"risk profile was updated."}
 
 @app.get('/api/get-risk-profile')# GET # allow all origins all methods.
