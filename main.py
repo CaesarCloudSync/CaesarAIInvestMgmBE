@@ -63,6 +63,18 @@ async def get_assets():
             return {"assets":assets}
     except Exception as ex:
         return {"error":f"{type(ex)},{ex}"}
+@app.delete('/api/delete-asset')# GET # allow all origins all methods.
+async def delete_asset(id:str):
+    try:
+        asset_exists =  caesarcrud.check_exists(("*"), Assets.ASSETSTABLE,f"id = '{id}'")
+        if asset_exists:
+            caesarcrud.delete_data(Assets.ASSETSTABLE,f"id = '{id}'")
+            return {"message":f"Asset ID {id} deleted."}
+        else:
+            return {"message":"Asset ID does not exist."}
+
+    except Exception as ex:
+        return {"error": f"{type(ex)},{ex}"}
 @app.post('/api/save-timeline-data')# GET # allow all origins all methods.
 async def save_timeline_data(timeline_data:JSONStructure):
     try:
