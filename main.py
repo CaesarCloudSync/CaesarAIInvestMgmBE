@@ -10,7 +10,7 @@ from fastapi import WebSocket,WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from CaesarJWT.caesarjwt import CaesarJWT
 from CaesarSQLDB.caesar_create_tables import CaesarCreateTables
-from models import Assets
+from models import Assets,UserData
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +33,31 @@ JSONStructure = Union[JSONArray, JSONObject]
 @app.get('/')# GET # allow all origins all methods.
 async def index():
     return "Welcome to CaesarAI Template. Hello"
+@app.post("/api/save-riskprofile")
+async def save_riskprofile(userData:UserData):
+    risk_profile_exists = caesarcrud.check_exists(("*"), UserData.USERDATATABLE)
+    if not risk_profile_exists:
+         caesarcrud.post_data(fields=UserData.USERDATAFIELDNAME, values=(userData.riskProfile,), table=UserData.USERDATATABLE)
+         return {"message":"risk profile was stored."}
+    else:
+        risk_profile = caesarcrud.get_data(UserData.USERDATAFIELDNAME,UserData.USERDATATABLE)[0]
+        caesarcrud.update_data(UserData.USERDATAFIELDNAME, values=(userData.riskProfile,), table=UserData.USERDATATABLE, condition=f"risk_profile = '{risk_profile}'")
+        return {"message":"risk profile was updated."}
+
+@app.get('/api/get-risk-profile')# GET # allow all origins all methods.
+async def get_risk_profile():
+    try:
+        risk_profile_exists = caesarcrud.check_exists(("*"), UserData.USERDATATABLE)
+        if not risk_profile_exists:
+            return {"message":"No risk profile table found. Please create the table first."}
+        else:
+            risk_profile = caesarcrud.get_data(fields=UserData.USERDATAFIELDNAME, table=UserData.USERDATATABLE)[0]
+            return risk_profile
+    except Exception as ex:
+        return {"error":f"{type(ex)},{ex}"}
+
+
+
 @app.post('/api/save-assets')# GET # allow all origins all methods.
 async def save_assets(assets:Assets):
     try:
